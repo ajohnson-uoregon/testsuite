@@ -2,8 +2,8 @@
 
 . ./setup.sh
 
-export QUIET_TEST_OUTPUT=1
+# export QUIET_TEST_OUTPUT=1
 
-test::run "functions_CXX_header_implemented.txt" "householderheader"
+test::run "functions_CXX_header_implemented.tau" "functions_CXX_header_implemented.txt" "householderheader"
 
-unset QUIET_TEST_OUTPUT
+# unset QUIET_TEST_OUTPUT

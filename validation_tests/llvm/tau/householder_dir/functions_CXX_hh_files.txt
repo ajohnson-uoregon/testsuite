@@ -1,8 +1,8 @@
 BEGIN_INCLUDE_LIST
-householder(int, int, double**, double**, double**)
-applyQ(int, double**, double*, double, int)
-applyR(int, double**, double*, double, int)
-matmul(int, int, int, double**, double**, double**)
+householder
+applyQ
+applyR
+matmul
 END_INCLUDE_LIST
 BEGIN_FILE_INCLUDE_LIST
 householder.cpp
@@ -12,4 +12,3 @@ BEGIN_FILE_EXCLUDE_LIST
 matmul.cpp
 Q.cpp
 END_FILE_EXCLUDE_LIST
-

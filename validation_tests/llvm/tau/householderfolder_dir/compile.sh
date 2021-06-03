@@ -4,4 +4,4 @@
 
 SOURCES="householder.cpp ./R/R.cpp Q.cpp matmul.cpp"
 
-test::compile "functions_CXX_folder.txt" "householder_folder" "$SOURCES"
+test::compile "functions_CXX_folder.tau" "householder_folder" "$SOURCES"
