@@ -1,5 +1,7 @@
 # testsuite
-E4S test suite with validation tests
+E4S test suite with validation tests -- a copy for me to use for PDT verification.
+
+Relevant things are in testsuite/validation_tests/llvm/tau/
 
 # Getting Started
 
