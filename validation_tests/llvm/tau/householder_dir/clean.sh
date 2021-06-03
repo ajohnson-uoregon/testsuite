@@ -7,6 +7,7 @@ householdercxx
 profile.*
 *.o
 *.log
+*.inst.*
 .symbols
 EOF
 
