@@ -7,6 +7,7 @@ profile.*
 *.o
 *.log
 .symbols
+*.inst.*
 EOF
 
 echo rm -f $FILES

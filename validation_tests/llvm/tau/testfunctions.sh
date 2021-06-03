@@ -12,32 +12,32 @@ NC='\033[0m'
 # - LLVM for the install of LLVM to use (default system accessible)
 # - PLUGIN_DIR if the plugin is not installed with LLVM (default with the above LLVM)
 # - TAU_INSTALL for the TAU install to use (no default)
-environment::enter() {
-    # Get the target LLVM from either the environment or the $PATH
-    export TEST_LLVM_INSTALL=$([ -n "$LLVM" ] && echo $LLVM || echo `which clang | awk -F"bin" {'print $1'}`)
+# environment::enter() {
+#     # Get the target LLVM from either the environment or the $PATH
+#     export TEST_LLVM_INSTALL=$([ -n "$LLVM" ] && echo $LLVM || echo `which clang | awk -F"bin" {'print $1'}`)
+#
+#     # Get the llvm version from llvm-config
+#     export TEST_LLVM_VERSION_MAJOR=$(echo `$TEST_LLVM_INSTALL/bin/llvm-config --version | awk -F"." {'print $1'}`)
+#
+#     # Is the plugin installed somewhere else ?
+#     export TEST_PLUGIN_PREFIX=$([ -n "$PLUGIN_DIR" ] && echo $PLUGIN_DIR || echo $LLVM_INSTALL/lib)
+#
+#     export TEST_TAU_INSTALL=$TAU_INSTALL
+#
+#     if [ -z "$TEST_LLVM_INSTALL" -o -z "$TEST_PLUGIN_PREFIX" -o -z "$TEST_TAU_INSTALL" ] ; then
+#         output::err "Invalid parameters."
+#         output::err Using LLVM: \"$TEST_LLVM_INSTALL\"
+#         output::err Using plugin in: \"$TEST_PLUGIN_PREFIX\"
+#         output::err Using libTAU.so from: \"$TEST_TAU_INSTALL\"
+#         output::err If any of those values are erroneous, please set the
+#         output::err LLVM, PLUGIN_DIR or TAU_INSTALL environment variables.
+#         exit 1
+#     fi
+# }
 
-    # Get the llvm version from llvm-config
-    export TEST_LLVM_VERSION_MAJOR=$(echo `$TEST_LLVM_INSTALL/bin/llvm-config --version | awk -F"." {'print $1'}`)
-
-    # Is the plugin installed somewhere else ?
-    export TEST_PLUGIN_PREFIX=$([ -n "$PLUGIN_DIR" ] && echo $PLUGIN_DIR || echo $LLVM_INSTALL/lib)
-
-    export TEST_TAU_INSTALL=$TAU_INSTALL
-
-    if [ -z "$TEST_LLVM_INSTALL" -o -z "$TEST_PLUGIN_PREFIX" -o -z "$TEST_TAU_INSTALL" ] ; then
-        output::err "Invalid parameters."
-        output::err Using LLVM: \"$TEST_LLVM_INSTALL\"
-        output::err Using plugin in: \"$TEST_PLUGIN_PREFIX\"
-        output::err Using libTAU.so from: \"$TEST_TAU_INSTALL\"
-        output::err If any of those values are erroneous, please set the
-        output::err LLVM, PLUGIN_DIR or TAU_INSTALL environment variables.
-        exit 1
-    fi
-}
-
-environment::exit() {
-    unset TEST_LLVM_INSTALL TEST_PLUGIN_PREFIX TEST_TAU_INSTALL TEST_LLVM_VERSION_MAJOR
-}
+# environment::exit() {
+#     unset TEST_LLVM_INSTALL TEST_PLUGIN_PREFIX TEST_TAU_INSTALL TEST_LLVM_VERSION_MAJOR
+# }
 
 output::err() {
 echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
@@ -68,9 +68,9 @@ ASSERT_LEN=${#PASSED}
 SEPARATOR=$(head -c $(($COLS - $PROMPT_LEN - $ASSERT_LEN)) < /dev/zero | tr '\0' '\ ')
 
 if [ "$2" -eq 0 ] ; then
-   echo -e "$1$SEPARATOR$BGREEN$PASSED$NC" 
-else 
-   echo -e "$1$SEPARATOR$BRED$FAILED$NC" 
+   echo -e "$1$SEPARATOR$BGREEN$PASSED$NC"
+else
+   echo -e "$1$SEPARATOR$BRED$FAILED$NC"
 fi
 }
 
@@ -86,22 +86,22 @@ symbols::exists() {
 symbols::analysis() {
     symbols::exists && return 0
 
-    environment::enter
+    # environment::enter
 
     OUTPUT=`mktemp`
     ERRFILE=`mktemp`
 
     OptionalC=${2:-C++}
-    
-    COMPILER=$TEST_LLVM_INSTALL/bin/clang++
-    
-    if [ $TEST_LLVM_VERSION_MAJOR -gt 12 ]; then
-        LEGACY_FLAG="-flegacy-pass-manager"
-    fi
+
+    COMPILER=clang++
+
+    # if [ $TEST_LLVM_VERSION_MAJOR -gt 12 ]; then
+    #     LEGACY_FLAG="-flegacy-pass-manager"
+    # fi
     if [ $OptionalC == "C" ]; then
-        COMPILER=$TEST_LLVM_INSTALL/bin/clang
-    fi    
-    
+        COMPILER=clang
+    fi
+
     $COMPILER $LEGACY_FLAG -o $OUTPUT \
         -O0 -g  -lm\
         $SOURCES \
@@ -126,7 +126,7 @@ symbols::analysis() {
 
     rm $OUTPUT $ERRFILE
 
-    environment::exit
+    # environment::exit
 }
 
 # Get the file in which a symbol is defined
@@ -158,7 +158,7 @@ symbols::exists || { output::err Database file not found; exit 1; }
 }
 
 test::compile() {
-    environment::enter
+    # environment::enter
 
     FUNC_LIST=$1
     OUTPUT=$2
@@ -166,29 +166,27 @@ test::compile() {
 
     OptionalC=${4:-C++}
 
-    COMPILER=$TEST_LLVM_INSTALL/bin/clang++
-    PLUGIN=$TEST_PLUGIN_PREFIX/TAU_Profiling_CXX.so
+    COMPILER=tau_cxx.sh
+    # PLUGIN=$TEST_PLUGIN_PREFIX/TAU_Profiling_CXX.so
 
     if [ $OptionalC == "C" ]; then
-        COMPILER=$TEST_LLVM_INSTALL/bin/clang
-        PLUGIN=$TEST_PLUGIN_PREFIX/TAU_Profiling.so
+        COMPILER=tau_cc.sh
+        # PLUGIN=$TEST_PLUGIN_PREFIX/TAU_Profiling.so
     fi
-    if [ $TEST_LLVM_VERSION_MAJOR -gt 12 ]; then
-        LEGACY_FLAG="-flegacy-pass-manager"
-    fi
+    # if [ $TEST_LLVM_VERSION_MAJOR -gt 12 ]; then
+    #     LEGACY_FLAG="-flegacy-pass-manager"
+    # fi
 
     ERRFILE=`mktemp`
 
+    # echo "compiling..."
+
+    # echo "$COMPILER $LEGACY_FLAG  -o $OUTPUT -O3 -g -optTauSelectFile=$FUNC_LIST $SOURCES"
+
     $COMPILER $LEGACY_FLAG  -o $OUTPUT \
         -O3 -g \
-        -fplugin=$PLUGIN \
-        -mllvm \
-        -tau-input-file=$FUNC_LIST \
-        -L$TEST_TAU_INSTALL \
-        -ldl -lTAU -lm \
-        -Wl,-rpath,$TEST_TAU_INSTALL \
-        $SOURCES \
-        &> $ERRFILE
+        -optTauSelectFile=$FUNC_LIST -optKeepFiles \
+        $SOURCES
     SUCCESS=$?
 
     output::status "Compilation of $OUTPUT" $SUCCESS
@@ -200,28 +198,29 @@ test::compile() {
     fi
 
     rm $ERRFILE
-    environment::exit
+    # environment::exit
 }
 
 test::run() {
     FUNC_LIST=$1
-    EXECUTABLE=$2
-    OptionalC=${3:-C++}
-    
+    TEST_LIST=$2
+    EXECUTABLE=$3
+    OptionalC=${4:-C++}
+
     OUTFILE=`mktemp`
     ERRFILE=`mktemp`
-    
-    tau_exec -T serial "./$EXECUTABLE" 256 256 > $OUTFILE 2> $ERRFILE
+
+    ./$EXECUTABLE > $OUTFILE 2> $ERRFILE
     SUCCESS=$?
-    
+
     output::status "Execution of $EXECUTABLE" $SUCCESS
-    
+
     if [ $SUCCESS -ne 0 ] ; then
         cat "$ERRFILE"
         exit 1
     fi
-    
-    test::verify $FUNC_LIST $OptionalC
+
+    test::verify $TEST_LIST $OptionalC
 
     #rm -f $OUTFILE $ERRFILE profile.*
 }
@@ -233,13 +232,13 @@ checkwildcard() {
        if echo $funcinclu | grep -qF "#"; then
            functoadd="$(symbols::match $funcinclu)"
            echo "$functoadd"
-       fi 
+       fi
    done
    echo "$fIncluded"
 }
 
 # Compares instrumentation instructions with actual instrumentation.
-# 
+#
 # For every function listed as included, we look if:
 #   - it is implemented
 #   - it is excluded
@@ -270,6 +269,7 @@ test::verify() {
     # Parses the output of pprof for instrumentation information
     fInstrumented=`pprof -l | grep -v "Reading" | grep -v ".TAU application"`
 
+    pprof -a
 
     # There might be spaces in the function names: change the separator
     IFS=$'\n'
@@ -285,7 +285,7 @@ test::verify() {
         if echo $funcinclu | grep -qF "#"; then
             continue
         fi
-        
+
         # Determines the file where the current function was implemented
         definition="$(echo $(symbols::file "$funcinclu") | sed "s:.*/::")"
 
@@ -354,7 +354,7 @@ test::verify() {
         if [ $varincluded -gt 0 ];
         then
             ((incorrectInstrumentation=incorrectInstrumentation+1))
-            echo -e "${BRED}Wrongfully instrumented: not included${NC}"
+            echo -e "${BRED} $funcinstru: Wrongfully instrumented: not included${NC}"
         fi
     done
 
